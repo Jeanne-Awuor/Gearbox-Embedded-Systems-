@@ -1,0 +1,146 @@
+/* Reset a bit */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Overall page */
+body {
+  font-family: 'Poppins', sans-serif;
+  color: #4a4a4a;
+  line-height: 1.7;
+  background: linear-gradient(to bottom, #fdf6f9, #ffffff);
+  min-height: 100vh;
+}
+
+/* Centered simple layout */
+header,
+main {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Heading */
+h1 {
+  font-size: 2rem;
+  letter-spacing: 1px;
+  text-align: center;
+  margin-top: 40px;
+  margin-bottom: 6px;
+}
+
+/* Small soft tagline */
+.tagline {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #8b7681;
+  margin-bottom: 24px;
+}
+
+/* Intro paragraph */
+.intro {
+  text-align: center;
+  font-size: 0.95rem;
+  margin-bottom: 24px;
+}
+
+/* Project list */
+.project-list {
+  list-style: none;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.project-list li {
+  margin-bottom: 10px;
+}
+
+/* Links */
+.project-list a {
+  text-decoration: none;
+  color: #c87793;
+  font-size: 0.95rem;
+}
+
+.project-list a:hover {
+  text-decoration: underline;
+}
+
+/* Center everything on screen */
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* The glass box */
+.glass-container {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  padding: 40px;
+  border-radius: 25px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  max-width: 600px;
+  width: 90%;
+  text-align: center;
+}
+
+.week-card {
+  background: rgba(255, 255, 255, 0.25);   /* semi-transparent */
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+  margin: 20px 0;
+}
+/* Week 1 card list */
+.week-card ul {
+  list-style: none;        /* remove default bullets */
+  padding: 0;
+  margin: 0;
+  text-align: left;        /* looks nicer inside the card */
+}
+
+.week-card li {
+  position: relative;
+  padding-left: 24px;      /* space for our custom dot */
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+}
+
+/* soft custom bullet dot */
+.week-card li::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 0.8em;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #d8a7b1;    /* soft rose */
+}
+
+.back-btn {
+  display: block;              /* makes it behave like a box */
+  width: fit-content;          /* shrink to content width */
+  margin: 25px auto 0;         /* auto left & right centers it */
+  padding: 10px 24px;
+  border-radius: 999px;
+  background-color: #d8a7b1;
+  color: white;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: 0.25s ease;
+}
+
+.back-btn:hover {
+  background-color: #c87793;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(216, 167, 177, 0.4);
+}
