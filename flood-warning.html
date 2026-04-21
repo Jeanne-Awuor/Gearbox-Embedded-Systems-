@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FloodSentinel — Urban Flood Monitoring & Intelligence System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0d1117;
+    --paper: #f4f1eb;
+    --water: #1a6b8a;
+    --water-light: #3b9bbf;
+    --water-pale: #dceef5;
+    --alert: #c0392b;
+    --alert-pale: #fdecea;
+    --safe: #1a7a4a;
+    --rule: #d0cbbe;
+    --mono: 'DM Mono', monospace;
+    --serif: 'Fraunces', serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    border-bottom: 1px solid var(--rule);
+    padding: 1.2rem 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    background: var(--paper);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--water);
+  }
+
+  .logo span { color: var(--ink); }
+
+  nav {
+    display: flex;
+    gap: 2rem;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #888;
+  }
+
+  nav a { text-decoration: none; color: inherit; transition: color 0.2s; }
+  nav a:hover { color: var(--water); }
+
+  /* ── HERO ── */
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 88vh;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .hero-left {
+    padding: 5rem 3rem 5rem 2.5rem;
+    border-right: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .project-tag {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--water);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .project-tag::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 1px;
+    background: var(--water);
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(2.8rem, 5vw, 4.2rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+    color: var(--ink);
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--water);
+  }
+
+  .hero-desc {
+    font-size: 14px;
+    color: #555;
+    max-width: 42ch;
+    margin-bottom: 2.5rem;
+    line-height: 1.8;
+  }
+
+  .hero-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin-top: auto;
+    max-width: 420px;
+  }
+
+  .stat {
+    background: var(--paper);
+    padding: 1.2rem 1.5rem;
+  }
+
+  .stat-num {
+    font-family: var(--serif);
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: var(--water);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #888;
+  }
+
+  /* ── HERO RIGHT: LIVE SIM ── */
+  .hero-right {
+    background: var(--ink);
+    padding: 3rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-right::before {
+    content: '';
+    position: absolute;
+    bottom: -60px;
+    right: -60px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(26,107,138,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .sim-label {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .sim-label .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #2ecc71;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  .river-viz {
+    background: #161b22;
+    border: 1px solid #2a2f3a;
+    border-radius: 4px;
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  .river-label {
+    font-size: 11px;
+    color: #555;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .level-bar-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .level-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .level-name {
+    font-size: 11px;
+    color: #888;
+    width: 80px;
+    flex-shrink: 0;
+  }
+
+  .level-track {
+    flex: 1;
+    height: 6px;
+    background: #2a2f3a;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .level-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1.5s ease;
+  }
+
+  .level-fill.safe { background: #2ecc71; }
+  .level-fill.warn { background: #f39c12; }
+  .level-fill.danger { background: var(--alert); animation: flicker 1s ease-in-out infinite; }
+
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  .level-val {
+    font-size: 11px;
+    color: #555;
+    width: 40px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .alert-box {
+    background: rgba(192,57,43,0.12);
+    border: 1px solid rgba(192,57,43,0.3);
+    border-radius: 4px;
+    padding: 1rem 1.2rem;
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+    animation: fadeSlide 0.5s ease forwards;
+  }
+
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .alert-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .alert-text {
+    font-size: 11px;
+    color: #e74c3c;
+    line-height: 1.6;
+  }
+
+  .alert-text strong {
+    display: block;
+    font-size: 12px;
+    margin-bottom: 0.2rem;
+    letter-spacing: 0.04em;
+  }
+
+  .sms-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .sms-item {
+    background: #161b22;
+    border: 1px solid #2a2f3a;
+    border-radius: 4px;
+    padding: 0.8rem 1rem;
+    font-size: 11px;
+    color: #888;
+    display: flex;
+    gap: 0.8rem;
+    opacity: 0;
+    animation: fadeSlide 0.4s ease forwards;
+  }
+
+  .sms-item:nth-child(1) { animation-delay: 0.3s; }
+  .sms-item:nth-child(2) { animation-delay: 0.9s; }
+  .sms-item:nth-child(3) { animation-delay: 1.5s; }
+
+  .sms-time { color: #555; flex-shrink: 0; }
+  .sms-msg { color: #ccc; }
+
+  /* ── SECTION SHARED ── */
+  section {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .section-header {
+    padding: 2rem 2.5rem 1.5rem;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    align-items: baseline;
+    gap: 1.5rem;
+  }
+
+  .section-num {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--water);
+  }
+
+  .section-title {
+    font-family: var(--serif);
+    font-size: 1.8rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  /* ── PROBLEM SECTION ── */
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .problem-card {
+    padding: 2.5rem;
+    border-right: 1px solid var(--rule);
+  }
+
+  .problem-card:last-child { border-right: none; }
+
+  .problem-icon {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .problem-card h3 {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+    letter-spacing: -0.01em;
+  }
+
+  .problem-card p {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.75;
+  }
+
+  .problem-card .figure {
+    font-family: var(--serif);
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--alert);
+    margin-top: 1rem;
+  }
+
+  /* ── ARCHITECTURE SECTION ── */
+  .arch-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+  }
+
+  .arch-left {
+    padding: 2.5rem;
+    border-right: 1px solid var(--rule);
+  }
+
+  .arch-right {
+    padding: 2.5rem;
+  }
+
+  .component-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+  }
+
+  .component {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    align-items: start;
+    gap: 1rem;
+    padding: 1.2rem 0;
+    border-bottom: 1px solid var(--rule);
+    cursor: default;
+    transition: background 0.2s;
+  }
+
+  .component:last-child { border-bottom: none; }
+  .component:hover { background: rgba(26,107,138,0.04); margin: 0 -1rem; padding: 1.2rem 1rem; }
+
+  .comp-num {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--water);
+    padding-top: 2px;
+  }
+
+  .comp-info h4 {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 0.2rem;
+  }
+
+  .comp-info p {
+    font-size: 12px;
+    color: #888;
+    line-height: 1.6;
+  }
+
+  .comp-tag {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.6rem;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  .comp-tag.hw { background: var(--water-pale); color: var(--water); }
+  .comp-tag.sw { background: #f0f0e8; color: #555; }
+  .comp-tag.comm { background: rgba(192,57,43,0.08); color: var(--alert); }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow-diagram {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .flow-step {
+    display: flex;
+    gap: 1.2rem;
+    align-items: flex-start;
+    opacity: 0;
+    animation: fadeSlide 0.5s ease forwards;
+  }
+
+  .flow-step:nth-child(1) { animation-delay: 0.1s; }
+  .flow-step:nth-child(2) { animation-delay: 0.2s; }
+  .flow-step:nth-child(3) { animation-delay: 0.3s; }
+  .flow-step:nth-child(4) { animation-delay: 0.4s; }
+  .flow-step:nth-child(5) { animation-delay: 0.5s; }
+
+  .flow-line {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 28px;
+  }
+
+  .flow-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--water);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .flow-connector {
+    width: 1px;
+    height: 36px;
+    background: var(--rule);
+    margin: 2px 0;
+  }
+
+  .flow-content {
+    padding-top: 4px;
+    padding-bottom: 1.8rem;
+  }
+
+  .flow-content h4 {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+  }
+
+  .flow-content p {
+    font-size: 12px;
+    color: #888;
+    line-height: 1.6;
+  }
+
+  /* ── IMPACT SECTION ── */
+  .impact-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .impact-item {
+    padding: 2.5rem 2rem;
+    border-right: 1px solid var(--rule);
+    text-align: center;
+  }
+
+  .impact-item:last-child { border-right: none; }
+
+  .impact-num {
+    font-family: var(--serif);
+    font-size: 3rem;
+    font-weight: 600;
+    color: var(--water);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .impact-label {
+    font-size: 12px;
+    color: #888;
+    line-height: 1.6;
+  }
+
+  /* ── TIMELINE ── */
+  .timeline-wrap {
+    padding: 2.5rem;
+  }
+
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    position: relative;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  .timeline-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+    padding: 0 1rem;
+  }
+
+  .t-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 2px solid var(--water);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .t-dot.done { background: var(--water); }
+  .t-dot.done::after { content: '✓'; color: white; font-size: 11px; }
+
+  .t-week {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--water);
+  }
+
+  .t-task {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.5;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 2rem 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: #aaa;
+    letter-spacing: 0.06em;
+  }
+
+  .footer-project {
+    font-family: var(--serif);
+    font-size: 1rem;
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--water-pale);
+    color: var(--water);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.8rem;
+    border-radius: 2px;
+  }
+
+  /* ── DUAL LOOP SECTION ── */
+  .dual-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dual-col {
+    padding: 3rem 2.5rem;
+  }
+
+  .dual-col:first-child {
+    border-right: 1px solid var(--rule);
+  }
+
+  .dual-tag {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 2px;
+  }
+
+  .dual-tag.immediate { background: rgba(192,57,43,0.08); color: var(--alert); }
+  .dual-tag.intelligence { background: var(--water-pale); color: var(--water); }
+
+  .dual-col h3 {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.8rem;
+    line-height: 1.2;
+  }
+
+  .dual-col > p {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 1.8rem;
+    line-height: 1.8;
+  }
+
+  .dual-points {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .dual-point {
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+    font-size: 13px;
+    color: #555;
+    line-height: 1.6;
+  }
+
+  .dual-point::before {
+    content: '→';
+    color: var(--water);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .loop-banner {
+    background: var(--ink);
+    padding: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: wrap;
+  }
+
+  .loop-item {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .loop-pill {
+    padding: 0.6rem 1.4rem;
+    border-radius: 2px;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .loop-pill.a { background: rgba(192,57,43,0.2); color: #e74c3c; }
+  .loop-pill.b { background: rgba(243,156,18,0.2); color: #f39c12; }
+  .loop-pill.c { background: rgba(46,204,113,0.2); color: #2ecc71; }
+  .loop-pill.d { background: rgba(26,107,138,0.2); color: var(--water-light); }
+  .loop-pill.e { background: rgba(155,89,182,0.2); color: #bb8fce; }
+  .loop-pill.f { background: rgba(52,152,219,0.2); color: #7fb3d3; }
+
+  .loop-arrow {
+    color: #333;
+    font-size: 14px;
+    padding: 0 0.6rem;
+  }
+
+  .loop-divider {
+    width: 1px;
+    height: 30px;
+    background: #2a2f3a;
+    margin: 0 2rem;
+  }
+
+  .loop-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #444;
+    margin-right: 1rem;
+  }
+
+  /* ── INSIGHT QUOTE ── */
+  .insight-block {
+    padding: 3.5rem 2.5rem;
+    display: grid;
+    grid-template-columns: 3px 1fr;
+    gap: 2rem;
+    align-items: center;
+    background: var(--water-pale);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .insight-bar {
+    width: 3px;
+    height: 100%;
+    background: var(--water);
+    min-height: 60px;
+  }
+
+  .insight-text {
+    font-family: var(--serif);
+    font-size: clamp(1.1rem, 2vw, 1.5rem);
+    font-weight: 300;
+    font-style: italic;
+    color: var(--ink);
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+  }
+
+  /* ── DESIGN DECISIONS ── */
+  .decisions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .decision-card {
+    padding: 2.5rem;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .decision-card:nth-child(3),
+  .decision-card:nth-child(6) { border-right: none; }
+  .decision-card:nth-child(4),
+  .decision-card:nth-child(5),
+  .decision-card:nth-child(6) { border-bottom: none; }
+
+  .decision-q {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--water);
+    margin-bottom: 0.6rem;
+  }
+
+  .decision-card h4 {
+    font-family: var(--serif);
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+
+  .decision-card p {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.75;
+  }
+
+  @media (max-width: 900px) {
+    .dual-wrap { grid-template-columns: 1fr; }
+    .dual-col:first-child { border-right: none; border-bottom: 1px solid var(--rule); }
+    .decisions-grid { grid-template-columns: 1fr; }
+    .decision-card { border-right: none; }
+    .loop-banner { flex-direction: column; gap: 0.5rem; }
+    .loop-divider { width: 60px; height: 1px; margin: 0.5rem 0; }
+  }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; min-height: auto; }
+    .hero-right { min-height: 400px; }
+    .problem-grid { grid-template-columns: 1fr; }
+    .problem-card { border-right: none; border-bottom: 1px solid var(--rule); }
+    .arch-wrap { grid-template-columns: 1fr; }
+    .arch-left { border-right: none; border-bottom: 1px solid var(--rule); }
+    .impact-grid { grid-template-columns: 1fr 1fr; }
+    .timeline { grid-template-columns: 1fr 1fr; gap: 2rem; }
+    .timeline::before { display: none; }
+    nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">Flood<span>Sentinel</span></div>
+  <nav>
+    <a href="#problem">Problem</a>
+    <a href="#dual">System</a>
+    <a href="#system">Architecture</a>
+    <a href="#intelligence">Intelligence</a>
+    <a href="#impact">Impact</a>
+  </nav>
+  <div class="badge">⬤ Prototype Stage</div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-left">
+    <div class="project-tag">Embedded Systems · IoT · Urban Intelligence · Public Safety</div>
+    <h1>Flooding,<br><em>understood.</em><br>Not just warned.</h1>
+    <p class="hero-desc">
+      FloodSentinel is a two-in-one urban flood monitoring and intelligence system.
+      It protects lives with real-time alerts — and gives cities the data they need
+      to fix flooding at its source. Continuously valuable, not just in rainy season.
+    </p>
+
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">40m</div>
+        <div class="stat-label">Warning lead time</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">24/7</div>
+        <div class="stat-label">Year-round operation</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">~$85</div>
+        <div class="stat-label">Cost per sensor node</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">SMS</div>
+        <div class="stat-label">No internet required</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="sim-label">
+      <span class="dot"></span>
+      Live simulation — Mathare River Node
+    </div>
+
+    <div class="river-viz">
+      <div class="river-label">Water Level — Upstream Sensors</div>
+      <div class="level-bar-wrap">
+        <div class="level-row">
+          <span class="level-name">Node A — 2km</span>
+          <div class="level-track"><div class="level-fill danger" style="width:91%"></div></div>
+          <span class="level-val" style="color:#e74c3c">0.91m</span>
+        </div>
+        <div class="level-row">
+          <span class="level-name">Node B — 1km</span>
+          <div class="level-track"><div class="level-fill warn" style="width:64%"></div></div>
+          <span class="level-val" style="color:#f39c12">0.64m</span>
+        </div>
+        <div class="level-row">
+          <span class="level-name">Node C — 500m</span>
+          <div class="level-track"><div class="level-fill safe" style="width:38%"></div></div>
+          <span class="level-val" style="color:#2ecc71">0.38m</span>
+        </div>
+      </div>
+
+      <div class="alert-box">
+        <span class="alert-icon">⚠</span>
+        <div class="alert-text">
+          <strong>FLOOD ALERT — LEVEL 2</strong>
+          Node A exceeded critical threshold (0.85m). Rising rate: +12cm/hr.
+          Estimated 38 min before downstream impact.
+        </div>
+      </div>
+    </div>
+
+    <div class="sim-label" style="margin-top: 0.5rem">SMS alerts dispatched</div>
+    <div class="sms-feed">
+      <div class="sms-item">
+        <span class="sms-time">14:02</span>
+        <span class="sms-msg">FLOOD WARNING: Mathare River rising fast. Move to higher ground now. Est. 38 min.</span>
+      </div>
+      <div class="sms-item">
+        <span class="sms-time">14:02</span>
+        <span class="sms-msg">ALERT to Ward Admin — Mathare North: Node A critical. Activate flood response.</span>
+      </div>
+      <div class="sms-item">
+        <span class="sms-time">14:03</span>
+        <span class="sms-msg">Red Cross Kenya — automated trigger: Mathare River flood event initiated.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROBLEM SECTION -->
+<section id="problem">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <h2 class="section-title">The problem we're solving</h2>
+  </div>
+  <div class="problem-grid">
+    <div class="problem-card">
+      <div class="problem-icon">🌊</div>
+      <h3>Zero warning time</h3>
+      <p>Communities along the Nairobi, Mathare, and Ngong rivers receive no advance notice when upstream conditions turn dangerous. Flash floods arrive in minutes.</p>
+      <div class="figure">0 min</div>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">🏘</div>
+      <h3>High-density exposure</h3>
+      <p>Over 200,000 Nairobi residents live in informal settlements within 500m of a major river. Displacement, property loss, and fatalities recur every rainy season.</p>
+      <div class="figure">200K+</div>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">📡</div>
+      <h3>Infrastructure gap</h3>
+      <p>Existing monitoring systems — where they exist — serve utility operators, not residents. There is no last-mile alert mechanism reaching the people most at risk.</p>
+      <div class="figure">No alerts</div>
+    </div>
+  </div>
+</section>
+
+<!-- DUAL SYSTEM SECTION -->
+<section id="dual">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <h2 class="section-title">A two-in-one system</h2>
+  </div>
+  <div class="dual-wrap">
+    <div class="dual-col">
+      <div class="dual-tag immediate">⚡ Layer 1 — Immediate Safety</div>
+      <h3>Real-time alerts that save lives</h3>
+      <p>When water rises upstream, FloodSentinel detects it immediately and pushes warnings to communities before conditions become dangerous.</p>
+      <div class="dual-points">
+        <div class="dual-point">Detects rising water levels at upstream sensor nodes in real time</div>
+        <div class="dual-point">Sends SMS alerts 20–40 minutes before flood reaches communities</div>
+        <div class="dual-point">Three-tier system: Watch → Warning → Critical escalation</div>
+        <div class="dual-point">No internet required — GSM reaches the most vulnerable populations</div>
+        <div class="dual-point">Simultaneously notifies residents, ward administrators, and emergency services</div>
+      </div>
+    </div>
+    <div class="dual-col">
+      <div class="dual-tag intelligence">📊 Layer 2 — City Intelligence</div>
+      <h3>Continuous data that fixes the root cause</h3>
+      <p>The same sensors that trigger alerts are also building a long-term picture of how flooding behaves across the city — every day, flood season or not.</p>
+      <div class="dual-points">
+        <div class="dual-point">Tracks flood frequency — how often events occur at each location</div>
+        <div class="dual-point">Measures flood intensity — how severe conditions become per event</div>
+        <div class="dual-point">Monitors rise rate — how quickly dangerous conditions develop</div>
+        <div class="dual-point">Maps location patterns — where water accumulates consistently</div>
+        <div class="dual-point">Reveals drainage system performance — identifies where infrastructure is failing</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THE LOOP BANNER -->
+  <div class="loop-banner">
+    <span class="loop-label">Safety loop</span>
+    <div class="loop-item">
+      <span class="loop-pill a">Detect</span>
+      <span class="loop-arrow">→</span>
+      <span class="loop-pill b">Alert</span>
+      <span class="loop-arrow">→</span>
+      <span class="loop-pill c">Protect</span>
+    </div>
+    <div class="loop-divider"></div>
+    <span class="loop-label">Intelligence loop</span>
+    <div class="loop-item">
+      <span class="loop-pill d">Store</span>
+      <span class="loop-arrow">→</span>
+      <span class="loop-pill e">Analyze</span>
+      <span class="loop-arrow">→</span>
+      <span class="loop-pill f">Improve</span>
+    </div>
+  </div>
+</section>
+
+<!-- INSIGHT QUOTE -->
+<div class="insight-block">
+  <div class="insight-bar"></div>
+  <p class="insight-text">
+    "FloodSentinel doesn't just warn people about floods. It helps the city understand
+    where flooding happens, how severe it is, and where drainage systems are failing —
+    so the right areas can be fixed."
+  </p>
+</div>
+
+<!-- ARCHITECTURE SECTION -->
+<section id="system">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <h2 class="section-title">System architecture</h2>
+  </div>
+  <div class="arch-wrap">
+    <div class="arch-left">
+      <p style="font-size:12px;color:#888;margin-bottom:1.5rem;line-height:1.7">
+        FloodSentinel uses a distributed network of low-power sensor nodes placed at strategic river points upstream. Each node operates independently and communicates via GSM — no Wi-Fi or mains power required.
+      </p>
+      <div class="component-list">
+        <div class="component">
+          <span class="comp-num">01</span>
+          <div class="comp-info">
+            <h4>ESP32 Microcontroller</h4>
+            <p>Central processing unit per node. Handles sensor reads, threshold logic, and communication triggers.</p>
+          </div>
+          <span class="comp-tag hw">HW</span>
+        </div>
+        <div class="component">
+          <span class="comp-num">02</span>
+          <div class="comp-info">
+            <h4>Ultrasonic Distance Sensor (HC-SR04)</h4>
+            <p>Non-contact water level measurement. Mounted above river surface, accurate to ±3mm.</p>
+          </div>
+          <span class="comp-tag hw">HW</span>
+        </div>
+        <div class="component">
+          <span class="comp-num">03</span>
+          <div class="comp-info">
+            <h4>SIM800L GSM Module</h4>
+            <p>Sends SMS alerts to registered residents, ward administrators, and emergency services automatically.</p>
+          </div>
+          <span class="comp-tag comm">COMM</span>
+        </div>
+        <div class="component">
+          <span class="comp-num">04</span>
+          <div class="comp-info">
+            <h4>Solar Panel + LiPo Battery</h4>
+            <p>Fully off-grid power. Nodes operate continuously with no dependency on grid infrastructure.</p>
+          </div>
+          <span class="comp-tag hw">HW</span>
+        </div>
+        <div class="component">
+          <span class="comp-num">05</span>
+          <div class="comp-info">
+            <h4>Threshold Alert Logic (Firmware)</h4>
+            <p>Three-tier alert system: Watch → Warning → Critical. Rise rate detection prevents false alarms.</p>
+          </div>
+          <span class="comp-tag sw">SW</span>
+        </div>
+        <div class="component">
+          <span class="comp-num">06</span>
+          <div class="comp-info">
+            <h4>Data Logging to Cloud Dashboard</h4>
+            <p>Historical level data sent via MQTT to a lightweight web dashboard for county water authorities.</p>
+          </div>
+          <span class="comp-tag sw">SW</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-right">
+      <p style="font-size:12px;color:#888;margin-bottom:2rem;line-height:1.7">How a flood event flows through the system</p>
+      <div class="flow-diagram">
+        <div class="flow-step">
+          <div class="flow-line">
+            <div class="flow-circle">1</div>
+            <div class="flow-connector"></div>
+          </div>
+          <div class="flow-content">
+            <h4>Sensor reads water level every 60 seconds</h4>
+            <p>HC-SR04 fires ultrasonic pulse. ESP32 calculates distance-to-surface and converts to absolute river depth using baseline calibration.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-line">
+            <div class="flow-circle">2</div>
+            <div class="flow-connector"></div>
+          </div>
+          <div class="flow-content">
+            <h4>Firmware checks against dynamic thresholds</h4>
+            <p>Not just absolute level — rise rate (cm/hr) is calculated. A slow rise at 0.9m may be safe; a rapid rise at 0.6m triggers Watch status.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-line">
+            <div class="flow-circle">3</div>
+            <div class="flow-connector"></div>
+          </div>
+          <div class="flow-content">
+            <h4>Alert level assigned: Watch / Warning / Critical</h4>
+            <p>Each tier escalates the response. Watch notifies the ward office. Warning triggers resident SMS. Critical triggers all channels simultaneously.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-line">
+            <div class="flow-circle">4</div>
+            <div class="flow-connector"></div>
+          </div>
+          <div class="flow-content">
+            <h4>SIM800L dispatches SMS alerts</h4>
+            <p>Pre-registered numbers receive plain-language alerts in English and Swahili. No app, no internet, no smartphone required on the resident's end.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-line">
+            <div class="flow-circle">5</div>
+          </div>
+          <div class="flow-content">
+            <h4>Data logged to cloud dashboard</h4>
+            <p>All readings pushed to MQTT broker → lightweight dashboard. County authorities get historical trends, node health status, and event logs.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTELLIGENCE SECTION -->
+<section id="intelligence">
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <h2 class="section-title">Why this isn't a seasonal project</h2>
+  </div>
+  <div class="dual-wrap">
+    <div class="dual-col" style="border-right: 1px solid var(--rule);">
+      <p style="font-size:13px;color:#555;line-height:1.8;margin-bottom:1.5rem;">
+        The concern with flood systems is always: <em>"what does it do when it's not raining?"</em>
+        FloodSentinel's answer is: it keeps working. Even on a dry day, the network is collecting
+        baseline data, monitoring drainage channel behaviour, and refining its picture of
+        how water moves across the city.
+      </p>
+      <div class="dual-points">
+        <div class="dual-point">Continuous baseline monitoring of water channels, wet or dry</div>
+        <div class="dual-point">Drainage efficiency scores — does a channel clear in 1hr or 6hrs post-rain?</div>
+        <div class="dual-point">Historical dataset accumulates with every passing week</div>
+        <div class="dual-point">County authorities access trends year-round, not just during emergencies</div>
+      </div>
+    </div>
+    <div class="dual-col">
+      <p style="font-size:12px;color:#888;margin-bottom:1.2rem;letter-spacing:0.06em;text-transform:uppercase;">What gets built over time</p>
+      <div style="display:flex;flex-direction:column;gap:1px;background:var(--rule);border:1px solid var(--rule);">
+        <div style="background:var(--paper);padding:1rem 1.2rem;display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:center;">
+          <span style="font-size:1.3rem;">🗺</span>
+          <div>
+            <div style="font-size:12px;font-weight:500;margin-bottom:0.2rem;">Flood risk map of Nairobi</div>
+            <div style="font-size:11px;color:#888;">Street-level heatmap of where flooding is worst and most frequent</div>
+          </div>
+        </div>
+        <div style="background:var(--paper);padding:1rem 1.2rem;display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:center;">
+          <span style="font-size:1.3rem;">🔧</span>
+          <div>
+            <div style="font-size:12px;font-weight:500;margin-bottom:0.2rem;">Drainage failure index</div>
+            <div style="font-size:11px;color:#888;">Evidence-based ranking of which infrastructure needs urgent repair</div>
+          </div>
+        </div>
+        <div style="background:var(--paper);padding:1rem 1.2rem;display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:center;">
+          <span style="font-size:1.3rem;">📈</span>
+          <div>
+            <div style="font-size:12px;font-weight:500;margin-bottom:0.2rem;">Year-on-year trend analysis</div>
+            <div style="font-size:11px;color:#888;">Is flooding getting worse or better in a given area over time?</div>
+          </div>
+        </div>
+        <div style="background:var(--paper);padding:1rem 1.2rem;display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:center;">
+          <span style="font-size:1.3rem;">🏛</span>
+          <div>
+            <div style="font-size:12px;font-weight:500;margin-bottom:0.2rem;">Infrastructure budget justification</div>
+            <div style="font-size:11px;color:#888;">Data counties can use to prioritise and fund drainage improvements</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DESIGN DECISIONS -->
+<section>
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <h2 class="section-title">Key design decisions</h2>
+  </div>
+  <div class="decisions-grid">
+    <div class="decision-card">
+      <div class="decision-q">Why not use existing systems?</div>
+      <h4>Last-mile gap that no one else fills</h4>
+      <p>Kenya Met and Google Maps provide general forecasts and regional data. FloodSentinel provides hyper-local, real-time detection at street and drainage level — especially in informal settlements and poorly mapped urban areas that existing systems ignore entirely.</p>
+    </div>
+    <div class="decision-card">
+      <div class="decision-q">How is accuracy maintained?</div>
+      <h4>Trend detection over single-point readings</h4>
+      <p>Rain interference, debris, and mounting conditions affect any sensor. FloodSentinel handles this through per-node baseline calibration, emphasis on rise-rate rather than absolute level, and multi-threshold logic. The system tracks trends, not just snapshots.</p>
+    </div>
+    <div class="decision-card">
+      <div class="decision-q">Why GSM over internet?</div>
+      <h4>Designed for the most vulnerable, not the most connected</h4>
+      <p>GSM requires no smartphone, no Wi-Fi, no app. A plain SMS reaches anyone with any mobile phone. This is a deliberate accessibility choice — the communities most exposed to flooding are often the least connected.</p>
+    </div>
+    <div class="decision-card">
+      <div class="decision-q">How are false alarms prevented?</div>
+      <h4>Three-factor alert logic</h4>
+      <p>Alerts require absolute water level + rise-rate + multi-stage threshold confirmation. A slow rise at 0.9m stays at Watch. A rapid rise at 0.6m triggers Warning. This prevents normal fluctuations from generating unnecessary alerts and eroding community trust.</p>
+    </div>
+    <div class="decision-card">
+      <div class="decision-q">What about maintenance?</div>
+      <h4>Low-cost, modular, community-serviceable</h4>
+      <p>Nodes are designed for easy replacement of individual components. Each node reports its own battery level and GSM signal status, enabling proactive maintenance. At ~$85 per node, replacement is affordable at ward or community level without central oversight.</p>
+    </div>
+    <div class="decision-card">
+      <div class="decision-q">How does it scale?</div>
+      <h4>Horizontally, without infrastructure dependency</h4>
+      <p>Each node operates independently — no mesh networking, no central hub required. Adding a new location means installing one node. The system scales across an entire city with no increase in coordination complexity and no dependency on fixed internet infrastructure.</p>
+    </div>
+  </div>
+</section>
+
+<!-- IMPACT SECTION -->
+<section id="impact">
+  <div class="section-header">
+    <span class="section-num">06</span>
+    <h2 class="section-title">Projected impact at scale</h2>
+  </div>
+  <div class="impact-grid">
+    <div class="impact-item">
+      <div class="impact-num">38</div>
+      <div class="impact-label">Minutes of warning<br>before downstream impact</div>
+    </div>
+    <div class="impact-item">
+      <div class="impact-num">365</div>
+      <div class="impact-label">Days per year the system<br>is actively collecting data</div>
+    </div>
+    <div class="impact-item">
+      <div class="impact-num">~$85</div>
+      <div class="impact-label">Per node — deployable<br>at community scale</div>
+    </div>
+    <div class="impact-item">
+      <div class="impact-num">0</div>
+      <div class="impact-label">Internet required on<br>the resident's device</div>
+    </div>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section id="timeline">
+  <div class="section-header">
+    <span class="section-num">07</span>
+    <h2 class="section-title">Build timeline — 10 weeks</h2>
+  </div>
+  <div class="timeline-wrap">
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="t-dot done"></div>
+        <span class="t-week">Wk 1–2</span>
+        <p class="t-task">Component procurement, sensor calibration, ESP32 environment setup</p>
+      </div>
+      <div class="timeline-item">
+        <div class="t-dot"></div>
+        <span class="t-week">Wk 3–4</span>
+        <p class="t-task">Firmware: level reading, threshold logic, rise-rate algorithm</p>
+      </div>
+      <div class="timeline-item">
+        <div class="t-dot"></div>
+        <span class="t-week">Wk 5–7</span>
+        <p class="t-task">GSM alert integration, SMS dispatch, field enclosure & solar wiring</p>
+      </div>
+      <div class="timeline-item">
+        <div class="t-dot"></div>
+        <span class="t-week">Wk 8–10</span>
+        <p class="t-task">Dashboard, field testing at Nairobi River, demo & documentation</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-project">FloodSentinel — Urban Flood Monitoring & Intelligence System</div>
+    <div style="margin-top:0.4rem">University of Nairobi · Electrical Engineering · Embedded Systems Project</div>
+  </div>
+  <div style="text-align:right">
+    <div style="margin-bottom:0.4rem">Solo Project · Proof of Concept</div>
+    <div>2025 — 2026 Academic Year</div>
+  </div>
+</footer>
+
+</body>
+</html>
